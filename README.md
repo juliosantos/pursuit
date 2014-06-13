@@ -4,9 +4,47 @@ First experiment with Go, where a set of chasers pursue a fugitive on a matrix.
 
 ```
 > ~/Development/go/pursuit (master) $ go run main.go 
-Caught at 2 3 after 4 moves
-> ~/Development/go/pursuit (master) $ go run main.go 
-Caught at 4 4 after 3 moves
-> ~/Development/go/pursuit (master) $ go run main.go 
-Caught at 1 2 after 3 moves
+ 0  0  0  0  0 
+ 0  0  0  1  0 
+ 0  0  0  0  0 
+ F  0  0  1  1 
+ 0  0  0  0  0 
+
+ 0  0  0  1  0 
+ 0  0  0  0  0 
+ F  0  0  0  0 
+ 0  0  1  0  0 
+ 0  0  0  0  0 
+
+ 0  0  0  0  0 
+ 0  0  0  1  0 
+ 0  F  1  0  0 
+ 0  0  0  0  0 
+ 0  0  0  0  0 
+
+ 0  0  0  0  0 
+ 0  F  2  0  0 
+ 0  0  0  0  0 
+ 0  0  0  0  0 
+ 0  0  0  0  0 
+
+ 0  F  0  0  0 
+ 0  1  0  1  0 
+ 0  0  0  0  0 
+ 0  0  0  0  0 
+ 0  0  0  0  0 
+
+ F  0  0  0  0 
+ 1  0  0  0  0 
+ 0  0  0  1  1 
+ 0  0  0  0  0 
+ 0  0  0  0  0 
+
+ X  0  0  0  0 
+ 0  0  0  0  0 
+ 0  0  0  1  0 
+ 0  0  0  0  0 
+ 0  0  0  0  0 
+
+Caught at {0 0} after 6 moves
 ```
