@@ -12,18 +12,18 @@ type Matrix struct {
 }
 
 type Position struct {
-  x int
-  y int
+	x int
+	y int
 }
 
 type Mover struct {
-  position Position
-  role string
+	position Position
+	role     string
 }
 
 func newMover(role string) *Mover {
 	mover := new(Mover)
-  mover.role = role
+	mover.role = role
 	mover.position.x = rand.Intn(matrix.width)
 	mover.position.y = rand.Intn(matrix.height)
 	return mover
@@ -64,6 +64,7 @@ func (chaser *Mover) pursue(fugitive *Mover) {
 		pursueInLine(&chaser.position.x, fugitive.position.x)
 	}
 }
+
 // moves chaser, in x or y, to reduce its distance from fugitive
 func pursueInLine(chaserCoord *int, fugitiveCoord int) {
 	if *chaserCoord > fugitiveCoord {
@@ -81,6 +82,7 @@ func (fugitive *Mover) escape(chaser *Mover) {
 		escapeInLine(&fugitive.position.y, chaser.position.y, matrix.width)
 	}
 }
+
 // moves chaser, in x or y, to increase its distance from fugitive
 func escapeInLine(fugitiveCoord *int, chaserCoord int, maxCoord int) {
 	if *fugitiveCoord > chaserCoord && *fugitiveCoord < maxCoord {
@@ -108,9 +110,9 @@ func chaserMoves(chasers []*Mover, fugitive *Mover) int {
 	for _, chaser := range chasers {
 		if chaser.canSee(fugitive) {
 			chaser.pursue(fugitive)
-      if chaser.overlapping(fugitive) {
-        return 1
-      }
+			if chaser.overlapping(fugitive) {
+				return 1
+			}
 		} else {
 			chaser.moveRandom()
 		}
@@ -120,55 +122,55 @@ func chaserMoves(chasers []*Mover, fugitive *Mover) int {
 }
 
 func pursuit(chasers []*Mover, fugitive *Mover) int {
-  state(chasers, fugitive)
+	state(chasers, fugitive)
 	for moves := 1; ; moves++ {
 		fugitiveMove(fugitive, chasers)
 		if chaserMoves(chasers, fugitive) == 1 {
 			// fugitive was caught
-      state(chasers, fugitive)
-      fmt.Println("Caught at", fugitive.position, "after", moves, "moves")
+			state(chasers, fugitive)
+			fmt.Println("Caught at", fugitive.position, "after", moves, "moves")
 			return 1
 		}
-    state(chasers, fugitive)
+		state(chasers, fugitive)
 	}
 
 	return 0
 }
 
 func state(chasers []*Mover, fugitive *Mover) {
-  board := make([][][]*Mover, matrix.height)
+	board := make([][][]*Mover, matrix.height)
 
-  for y, _ := range board {
-    board[y] = make([][]*Mover, matrix.width)
+	for y, _ := range board {
+		board[y] = make([][]*Mover, matrix.width)
 
-    for x, _ := range board[y] {
-      board[y][x] = make([]*Mover, 0)
-      if (fugitive.position.x == x && fugitive.position.y == y) {
-        board[y][x] = append(board[y][x], fugitive)
-      }
+		for x, _ := range board[y] {
+			board[y][x] = make([]*Mover, 0)
+			if fugitive.position.x == x && fugitive.position.y == y {
+				board[y][x] = append(board[y][x], fugitive)
+			}
 
-      for _, chaser := range chasers {
-        if (chaser.position.x == x && chaser.position.y == y) {
-          board[y][x] = append(board[y][x], chaser)
-        }
-      }
-    }
-  }
+			for _, chaser := range chasers {
+				if chaser.position.x == x && chaser.position.y == y {
+					board[y][x] = append(board[y][x], chaser)
+				}
+			}
+		}
+	}
 
-  for _, row := range board {
-    for _, col := range row {
-      if len(col) == 1 && col[0] == fugitive {
-        fmt.Print(" F ")
-      } else if len(col) > 1 && col[0] == fugitive {
-        fmt.Print(" X ")
-      } else {
-        fmt.Print(" ", len(col), " ")
-      }
-    }
-    fmt.Print("\n")
-  }
+	for _, row := range board {
+		for _, col := range row {
+			if len(col) == 1 && col[0] == fugitive {
+				fmt.Print(" F ")
+			} else if len(col) > 1 && col[0] == fugitive {
+				fmt.Print(" X ")
+			} else {
+				fmt.Print(" ", len(col), " ")
+			}
+		}
+		fmt.Print("\n")
+	}
 
-  fmt.Print("\n")
+	fmt.Print("\n")
 }
 
 var matrix Matrix
