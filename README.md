@@ -3,7 +3,7 @@
 First experiment with Go, where a set of chasers pursue a fugitive on a matrix.
 
 ```
-> ~/Development/go/pursuit (master) $ go run main.go 
+> ~/Development/go/pursuit (master) $ go run main.go -cols 5 -rows 5 -nChasers 3
  0  0  0  0  0 
  0  0  0  1  0 
  0  0  0  0  0 

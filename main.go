@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"math/rand"
 	"time"
@@ -179,12 +180,16 @@ func main() {
 	// use a different seed evety time the program runs
 	rand.Seed(time.Now().UTC().UnixNano())
 
+	cols := flag.Int("cols", 5, "number of columns")
+	rows := flag.Int("rows", 5, "number of rows")
+	nChasers := flag.Int("nChasers", 3, "number of chasers")
+	flag.Parse()
+
 	// create the matrix
-	matrix = Matrix{10, 10}
+	matrix = Matrix{*cols, *rows}
 
 	// create the chasers
-	nChasers := 3
-	chasers := make([]*Mover, nChasers)
+	chasers := make([]*Mover, *nChasers)
 	for i, _ := range chasers {
 		chasers[i] = newMover("chaser")
 	}
