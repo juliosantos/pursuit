@@ -7,114 +7,112 @@ import (
 )
 
 type Matrix struct {
-	Width  int
-	Height int
+	width  int
+	height int
 }
 
-func NewMatrix(width int, height int) *Matrix {
-	matrix := new(Matrix)
-	matrix.Width = width
-	matrix.Height = height
-	return matrix
+type Position struct {
+  x int
+  y int
 }
 
 type Mover struct {
-	X int
-	Y int
+  position Position
+  role string
 }
 
-func NewMover() *Mover {
+func newMover(role string) *Mover {
 	mover := new(Mover)
-	mover.X = rand.Intn(matrix.Width)
-	mover.Y = rand.Intn(matrix.Height)
+  mover.role = role
+	mover.position.x = rand.Intn(matrix.width)
+	mover.position.y = rand.Intn(matrix.height)
 	return mover
 }
 
-func moveRandom(mover *Mover) {
-	p := rand.Intn(2) // move on X or Y?
+func (mover *Mover) moveRandom() {
+	p := rand.Intn(2) // move on x or y?
 	x := rand.Intn(2)
 	y := rand.Intn(2)
 	if p == 1 {
-		if (x == 1 || mover.X == 0) && mover.X < matrix.Width {
-			mover.X++
+		if (x == 1 || mover.position.x == 0) && mover.position.x < matrix.width {
+			mover.position.x++
 		} else {
-			mover.X--
+			mover.position.x--
 		}
 	} else {
-		if (y == 1 || mover.Y == 0) && mover.Y < matrix.Height {
-			mover.Y++
+		if (y == 1 || mover.position.y == 0) && mover.position.y < matrix.height {
+			mover.position.y++
 		} else {
-			mover.Y--
+			mover.position.y--
 		}
 	}
 }
 
-func overlapping(mover1 *Mover, mover2 *Mover) bool {
-	return mover1.X == mover2.X && mover1.Y == mover2.Y
+func (mover1 *Mover) overlapping(mover2 *Mover) bool {
+	return mover1.position == mover2.position
 }
 
-func pursue(chaser *Mover, fugitive *Mover) {
-	if chaser.X == fugitive.X {
-		pursueInLine(&chaser.Y, &fugitive.Y)
+func (mover1 *Mover) canSee(mover2 *Mover) bool {
+	return mover1.position.x == mover2.position.x || mover1.position.y == mover2.position.y
+}
+
+// moves chaser closer to fugitive, in x or y
+func (chaser *Mover) pursue(fugitive *Mover) {
+	if chaser.position.x == fugitive.position.x {
+		pursueInLine(&chaser.position.y, fugitive.position.y)
 	} else {
-		pursueInLine(&chaser.X, &fugitive.X)
+		pursueInLine(&chaser.position.x, fugitive.position.x)
 	}
 }
-
-// moves chaser, in X or Y, to reduce its distance from fugitive
-func pursueInLine(chaserCoord *int, fugitiveCoord *int) {
-	if *chaserCoord > *fugitiveCoord {
+// moves chaser, in x or y, to reduce its distance from fugitive
+func pursueInLine(chaserCoord *int, fugitiveCoord int) {
+	if *chaserCoord > fugitiveCoord {
 		*chaserCoord--
 	} else {
 		*chaserCoord++
 	}
 }
 
-// moves chaser, in X or Y, to increase its distance from fugitive
-func escapeInLine(chaserCoord *int, fugitiveCoord *int) {
-	if *chaserCoord > *fugitiveCoord {
-		*chaserCoord++
+// moves fugitive away from chaser, in x or y
+func (fugitive *Mover) escape(chaser *Mover) {
+	if chaser.position.x == fugitive.position.x {
+		escapeInLine(&fugitive.position.x, chaser.position.x, matrix.height)
 	} else {
-		*chaserCoord--
+		escapeInLine(&fugitive.position.y, chaser.position.y, matrix.width)
 	}
 }
-
-// moves fugitive away from chaser, in X or Y
-func escape(fugitive *Mover, chaser *Mover) {
-	if chaser.X == fugitive.X {
-		escapeInLine(&chaser.Y, &fugitive.Y)
-	} else {
-		escapeInLine(&chaser.X, &fugitive.X)
+// moves chaser, in x or y, to increase its distance from fugitive
+func escapeInLine(fugitiveCoord *int, chaserCoord int, maxCoord int) {
+	if *fugitiveCoord > chaserCoord && *fugitiveCoord < maxCoord {
+		*fugitiveCoord++
+	} else if *fugitiveCoord > 0 {
+		*fugitiveCoord--
 	}
-}
-
-func moverSeesMover(mover1 *Mover, mover2 *Mover) bool {
-	return mover1.X == mover2.X || mover1.Y == mover2.Y
 }
 
 func fugitiveMove(fugitive *Mover, chasers []*Mover) {
 	moved := false
 	for _, chaser := range chasers {
-		if moverSeesMover(fugitive, chaser) {
-			escape(fugitive, chaser)
+		if fugitive.canSee(chaser) {
+			fugitive.escape(chaser)
 			moved = true
 			break
 		}
 	}
 	if !moved {
-		moveRandom(fugitive)
+		fugitive.moveRandom()
 	}
 }
 
-func chaserMoves(chasers []*Mover, fugitive *Mover, moves int) int {
+func chaserMoves(chasers []*Mover, fugitive *Mover) int {
 	for _, chaser := range chasers {
-		if overlapping(chaser, fugitive) {
-			fmt.Println("Caught at", chaser.X, chaser.Y, "after", moves, "moves")
-			return 1
-		} else if moverSeesMover(chaser, fugitive) {
-			pursue(chaser, fugitive)
+		if chaser.canSee(fugitive) {
+			chaser.pursue(fugitive)
+      if chaser.overlapping(fugitive) {
+        return 1
+      }
 		} else {
-			moveRandom(chaser)
+			chaser.moveRandom()
 		}
 	}
 
@@ -122,35 +120,75 @@ func chaserMoves(chasers []*Mover, fugitive *Mover, moves int) int {
 }
 
 func pursuit(chasers []*Mover, fugitive *Mover) int {
-	for moves := 1; moves < 1000000; moves++ {
+  state(chasers, fugitive)
+	for moves := 1; ; moves++ {
 		fugitiveMove(fugitive, chasers)
-		if chaserMoves(chasers, fugitive, moves) == 1 {
+		if chaserMoves(chasers, fugitive) == 1 {
 			// fugitive was caught
+      state(chasers, fugitive)
+      fmt.Println("Caught at", fugitive.position, "after", moves, "moves")
 			return 1
 		}
+    state(chasers, fugitive)
 	}
 
 	return 0
 }
 
-var matrix *Matrix
+func state(chasers []*Mover, fugitive *Mover) {
+  board := make([][][]*Mover, matrix.height)
+
+  for y, _ := range board {
+    board[y] = make([][]*Mover, matrix.width)
+
+    for x, _ := range board[y] {
+      board[y][x] = make([]*Mover, 0)
+      if (fugitive.position.x == x && fugitive.position.y == y) {
+        board[y][x] = append(board[y][x], fugitive)
+      }
+
+      for _, chaser := range chasers {
+        if (chaser.position.x == x && chaser.position.y == y) {
+          board[y][x] = append(board[y][x], chaser)
+        }
+      }
+    }
+  }
+
+  for _, row := range board {
+    for _, col := range row {
+      if len(col) == 1 && col[0] == fugitive {
+        fmt.Print(" F ")
+      } else if len(col) > 1 && col[0] == fugitive {
+        fmt.Print(" X ")
+      } else {
+        fmt.Print(" ", len(col), " ")
+      }
+    }
+    fmt.Print("\n")
+  }
+
+  fmt.Print("\n")
+}
+
+var matrix Matrix
 
 func main() {
 	// use a different seed evety time the program runs
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	// create the matrix
-	matrix = NewMatrix(5, 5)
+	matrix = Matrix{10, 10}
 
 	// create the chasers
-	nChasers := 4
+	nChasers := 3
 	chasers := make([]*Mover, nChasers)
 	for i, _ := range chasers {
-		chasers[i] = NewMover()
+		chasers[i] = newMover("chaser")
 	}
 
 	// create the fugitive
-	fugitive := NewMover()
+	fugitive := newMover("fugitive")
 
 	// start
 	pursuit(chasers, fugitive)
