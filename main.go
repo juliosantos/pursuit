@@ -176,14 +176,20 @@ func state(chasers []*Mover, fugitive *Mover) {
 
 var matrix Matrix
 
-func main() {
-	// use a different seed evety time the program runs
-	rand.Seed(time.Now().UTC().UnixNano())
-
+func parseFlags() (*int, *int, *int) {
 	cols := flag.Int("cols", 5, "number of columns")
 	rows := flag.Int("rows", 5, "number of rows")
 	nChasers := flag.Int("nChasers", 3, "number of chasers")
 	flag.Parse()
+	return cols, rows, nChasers
+}
+
+func main() {
+	// use a different seed evety time the program runs
+	rand.Seed(time.Now().UTC().UnixNano())
+
+	// get command line arguments
+	cols, rows, nChasers := parseFlags()
 
 	// create the matrix
 	matrix = Matrix{*cols, *rows}
